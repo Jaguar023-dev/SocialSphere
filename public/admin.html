@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialSphere Admin Panel</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Admin Login -->
+        <div id="adminLogin" class="admin-login">
+            <div class="login-card">
+                <h1><i class="fas fa-shield-alt"></i> SocialSphere Admin</h1>
+                <p class="subtitle">Restricted Access - Authorized Personnel Only</p>
+                
+                <div class="login-form">
+                    <div class="input-group">
+                        <label for="adminUsername"><i class="fas fa-user"></i> Username</label>
+                        <input type="text" id="adminUsername" placeholder="Enter admin username" value="admin">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="adminPassword"><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" id="adminPassword" placeholder="Enter admin password" value="admin123">
+                    </div>
+                    
+                    <button id="adminLoginBtn" class="btn-admin-login">
+                        <i class="fas fa-sign-in-alt"></i> Login to Admin Panel
+                    </button>
+                    
+                    <div class="hint">
+                        <p><strong>Default Credentials:</strong> admin / admin123</p>
+                    </div>
+                    
+                    <a href="index.html" class="back-link">
+                        <i class="fas fa-arrow-left"></i> Back to SocialSphere
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard (Hidden until login) -->
+        <div id="adminDashboard" class="admin-dashboard" style="display: none;">
+            <!-- Admin Header -->
+            <header class="admin-header">
+                <div class="header-left">
+                    <h1><i class="fas fa-shield-alt"></i> Admin Dashboard</h1>
+                    <p class="welcome">Welcome, <span id="adminName">Administrator</span></p>
+                </div>
+                <div class="header-right">
+                    <button id="logoutAdmin" class="btn-logout-admin">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                    <button id="exportData" class="btn-export">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                </div>
+            </header>
+
+            <!-- Admin Stats -->
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <h3><i class="fas fa-users"></i> Total Users</h3>
+                    <p class="stat-number" id="totalUsers">1</p>
+                </div>
+                <div class="stat-card">
+                    <h3><i class="fas fa-newspaper"></i> Total Posts</h3>
+                    <p class="stat-number" id="totalPosts">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3><i class="fas fa-comments"></i> Total Messages</h3>
+                    <p class="stat-number" id="totalMessages">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3><i class="fas fa-dollar-sign"></i> Total Revenue</h3>
+                    <p class="stat-number" id="totalRevenue">$0.00</p>
+                </div>
+            </div>
+
+            <!-- Admin Tabs -->
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="users">Users Management</button>
+                <button class="tab-btn" data-tab="content">Content Moderation</button>
+                <button class="tab-btn" data-tab="monetization">Monetization</button>
+                <button class="tab-btn" data-tab="verification">Verification</button>
+                <button class="tab-btn" data-tab="system">System Settings</button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="tab-content">
+                <!-- Users Management -->
+                <div id="users-tab" class="tab-pane active">
+                    <div class="tab-header">
+                        <h2><i class="fas fa-user-cog"></i> Users Management</h2>
+                        <button class="btn-add-user" id="addUserBtn">
+                            <i class="fas fa-plus"></i> Add New User
+                        </button>
+                    </div>
+                    
+                    <div class="search-box-admin">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchUsers" placeholder="Search users...">
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Verified</th>
+                                    <th>Status</th>
+                                    <th>Balance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                <!-- Users will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Content Moderation -->
+                <div id="content-tab" class="tab-pane">
+                    <h2><i class="fas fa-flag"></i> Content Moderation</h2>
+                    <div class="moderation-controls">
+                        <button class="btn-moderation" id="refreshPosts">
+                            <i class="fas fa-sync"></i> Refresh Posts
+                        </button>
+                        <button class="btn-moderation btn-danger" id="clearAllPosts">
+                            <i class="fas fa-trash"></i> Clear All Posts
+                        </button>
+                    </div>
+                    
+                    <div class="posts-container" id="moderationPosts">
+                        <!-- Posts for moderation will appear here -->
+                    </div>
+                </div>
+
+                <!-- Monetization -->
+                <div id="monetization-tab" class="tab-pane">
+                    <h2><i class="fas fa-chart-line"></i> Monetization Dashboard</h2>
+                    
+                    <div class="revenue-controls">
+                        <div class="control-group">
+                            <label>Ad Rate per 1000 views:</label>
+                            <input type="number" id="adRate" value="5.00" step="0.01">
+                        </div>
+                        <button class="btn-update-rate" id="updateRateBtn">Update Rate</button>
+                    </div>
+                    
+                    <div class="payouts-section">
+                        <h3>Pending Payouts</h3>
+                        <div id="payoutsList">
+                            <!-- Payouts will appear here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verification -->
+                <div id="verification-tab" class="tab-pane">
+                    <h2><i class="fas fa-check-circle"></i> Verification Requests</h2>
+                    <div id="verificationRequests">
+                        <!-- Verification requests will appear here -->
+                    </div>
+                </div>
+
+                <!-- System Settings -->
+                <div id="system-tab" class="tab-pane">
+                    <h2><i class="fas fa-cogs"></i> System Settings</h2>
+                    
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <h3><i class="fas fa-bell"></i> Notification Settings</h3>
+                            <div class="toggle-group">
+                                <label>Enable Email Notifications</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="emailNotifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-group">
+                                <label>Enable Push Notifications</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="pushNotifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-card">
+                            <h3><i class="fas fa-paint-brush"></i> Theme Settings</h3>
+                            <select id="themeSelect" class="theme-select">
+                                <option value="light">Light Theme</option>
+                                <option value="dark">Dark Theme</option>
+                                <option value="blue">Blue Theme</option>
+                            </select>
+                            <button class="btn-apply-theme" id="applyThemeBtn">Apply Theme</button>
+                        </div>
+                        
+                        <div class="setting-card">
+                            <h3><i class="fas fa-database"></i> Data Management</h3>
+                            <button class="btn-data" id="clearAllData">
+                                <i class="fas fa-trash"></i> Clear All App Data
+                            </button>
+                            <button class="btn-data" id="resetToDefault">
+                                <i class="fas fa-redo"></i> Reset to Default
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="danger-zone">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+                        <p>These actions cannot be undone. Proceed with caution.</p>
+                        <button class="btn-danger-zone" id="nukeApp">
+                            <i class="fas fa-bomb"></i> Delete Everything
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
