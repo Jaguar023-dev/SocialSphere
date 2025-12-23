@@ -649,6 +649,8 @@ app.get('/api/friends', authenticateToken, async (req, res) => {
     }
 });
 
+// ... (Previous code remains the same until line 365)
+
 app.post('/api/friends/request', authenticateToken, async (req, res) => {
     try {
         const { friendId } = req.body;
@@ -659,4 +661,264 @@ app.post('/api/friends/request', authenticateToken, async (req, res) => {
 
         // Get current friend data
         const userFriends = await storage.getFriends(req.user.id);
-        const friendFriends = await sto
+        const friendFriends = await storage.getFriends(friendId);
+
+        // Add to requests if not already friends
+        if (!userFriends.friends.includes(friendId) && !userFriends.requests.includes(friendId)) {
+            userFriends.requests = userFriends.requests || [];
+            userFriends.requests.push(friendId);
+            userFriends.userId = req.user.id;
+            
+            await storage.updateFriends(req.user.id, userFriends);
+        }
+
+        // Create notification
+        await storage.createNotification({
+            type: 'friend_request',
+            message: `${req.user.username} sent you a friend request`,
+            userId: friendId
+        });
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Send friend request error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.post('/api/friends/accept', authenticateToken, async (req, res) => {
+    try {
+        const { friendId } = req.body;
+        
+        if (!friendId) {
+            return res.status(400).json({ error: 'Friend ID required' });
+        }
+
+        // Get friend data
+        const userFriends = await storage.getFriends(req.user.id);
+        const friendFriends = await storage.getFriends(friendId);
+
+        // Remove from requests and add to friends
+        if (userFriends.requests && userFriends.requests.includes(friendId)) {
+            userFriends.requests = userFriends.requests.filter(id => id !== friendId);
+            userFriends.friends = userFriends.friends || [];
+            userFriends.friends.push(friendId);
+            
+            friendFriends.friends = friendFriends.friends || [];
+            friendFriends.friends.push(req.user.id);
+            
+            await storage.updateFriends(req.user.id, userFriends);
+            await storage.updateFriends(friendId, friendFriends);
+
+            // Create notification
+            await storage.createNotification({
+                type: 'friend_accepted',
+                message: `${req.user.username} accepted your friend request`,
+                userId: friendId
+            });
+
+            res.json({ success: true });
+        } else {
+            res.status(400).json({ error: 'No friend request found' });
+        }
+    } catch (error) {
+        console.error('Accept friend request error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Admin Routes
+app.get('/api/admin/statistics', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const stats = await storage.getStatistics();
+        res.json(stats);
+    } catch (error) {
+        console.error('Get statistics error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/api/admin/users', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const users = await storage.getAllUsers();
+        // Remove passwords from response
+        const safeUsers = users.map(user => {
+            const { password, ...safeUser } = user;
+            return safeUser;
+        });
+        res.json(safeUsers);
+    } catch (error) {
+        console.error('Get users error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.put('/api/admin/users/:id/verify', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const updatedUser = await storage.updateUser(userId, { verified: true });
+        
+        if (!updatedUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Create notification
+        await storage.createNotification({
+            type: 'account_verified',
+            message: 'Your account has been verified!',
+            userId: userId
+        });
+
+        const { password, ...userData } = updatedUser;
+        res.json(userData);
+    } catch (error) {
+        console.error('Verify user error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.delete('/api/admin/users/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const userId = req.params.id;
+        await storage.deleteUser(userId);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Delete user error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.delete('/api/admin/posts/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const postId = req.params.id;
+        await storage.deletePost(postId);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Delete post error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Export data
+app.get('/api/admin/export', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const data = await storage.loadData();
+        const exportData = {
+            ...data,
+            exportDate: new Date().toISOString()
+        };
+        
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', 'attachment; filename=socialsphere-backup.json');
+        res.send(JSON.stringify(exportData, null, 2));
+    } catch (error) {
+        console.error('Export data error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Clear all data (admin only)
+app.delete('/api/admin/clear-all', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const initialData = {
+            users: [],
+            posts: [],
+            messages: [],
+            friends: [],
+            groups: [],
+            notifications: [],
+            settings: {
+                theme: 'light',
+                emailNotifications: true,
+                pushNotifications: true,
+                adRate: 5.00
+            }
+        };
+        
+        await storage.saveData(initialData);
+        res.json({ success: true, message: 'All data cleared' });
+    } catch (error) {
+        console.error('Clear all data error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Serve HTML files
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        timestamp: new Date().toISOString(),
+        service: 'SocialSphere API'
+    });
+});
+
+// 404 handler for API routes
+app.use('/api/*', (req, res) => {
+    res.status(404).json({ error: 'API endpoint not found' });
+});
+
+// Serve other static files
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', req.path));
+});
+
+// 404 handler for all other routes
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+    console.error('Server error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+});
+
+// Create data directory if it doesn't exist
+const fsSync = require('fs');
+const dataDir = path.join(__dirname, 'data');
+if (!fsSync.existsSync(dataDir)) {
+    fsSync.mkdirSync(dataDir, { recursive: true });
+}
+
+// Start server
+const startServer = async () => {
+    try {
+        // Initialize storage
+        await storage.initStorage();
+        
+        app.listen(PORT, () => {
+            console.log(`SocialSphere server running on port ${PORT}`);
+            console.log(`Open http://localhost:${PORT} in your browser`);
+            console.log(`Admin panel: http://localhost:${PORT}/admin`);
+            console.log(`API health check: http://localhost:${PORT}/api/health`);
+        });
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+};
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (error) => {
+    console.error('Unhandled Rejection:', error);
+});
+
+// Start the server
+if (require.main === module) {
+    startServer();
+}
+
+module.exports = app;
