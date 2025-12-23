@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialSphere - Connect & Share</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <h1 class="logo"><i class="fas fa-globe-americas"></i> SocialSphere</h1>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search SocialSphere">
+            </div>
+        </div>
+        <div class="nav-center">
+            <a href="#feed" class="nav-link active"><i class="fas fa-home"></i></a>
+            <a href="#friends" class="nav-link"><i class="fas fa-user-friends"></i></a>
+            <a href="#groups" class="nav-link"><i class="fas fa-users"></i></a>
+            <a href="#videos" class="nav-link"><i class="fas fa-video"></i></a>
+            <a href="#messages" class="nav-link message-btn"><i class="fas fa-comments"></i></a>
+            <a href="#notifications" class="nav-link"><i class="fas fa-bell"></i></a>
+        </div>
+        <div class="nav-right">
+            <a href="#profile" class="profile-link">
+                <img src="https://ui-avatars.com/api/?name=Guest&background=007bff" alt="Profile" class="profile-pic-sm" id="userAvatar">
+            </a>
+            <a href="#monetization" class="nav-icon"><i class="fas fa-dollar-sign"></i></a>
+            <a href="#settings" class="nav-icon"><i class="fas fa-cog"></i></a>
+            <a href="admin.html" class="admin-btn" title="Admin Panel"><i class="fas fa-shield-alt"></i></a>
+            <button class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Left Sidebar -->
+        <div class="left-sidebar">
+            <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=Guest&background=007bff" alt="Profile" class="profile-pic" id="mainAvatar">
+                <h3 id="currentUser">Guest User</h3>
+                <span class="verified-badge" id="verifiedBadge" style="display: none;">
+                    <i class="fas fa-check-circle"></i> Verified
+                </span>
+            </div>
+            
+            <div class="sidebar-menu">
+                <a href="#feed" class="menu-item active"><i class="fas fa-newspaper"></i> News Feed</a>
+                <a href="#friends" class="menu-item"><i class="fas fa-user-friends"></i> Friends <span class="badge" id="friendCount">0</span></a>
+                <a href="#messages" class="menu-item message-btn"><i class="fas fa-comments"></i> Messages <span class="badge" id="messageCount">0</span></a>
+                <a href="#groups" class="menu-item"><i class="fas fa-users"></i> Groups <span class="badge" id="groupCount">0</span></a>
+                <a href="#videos" class="menu-item"><i class="fas fa-video"></i> Reels</a>
+                <a href="#events" class="menu-item"><i class="fas fa-calendar-alt"></i> Events</a>
+                <a href="#memories" class="menu-item"><i class="fas fa-history"></i> Memories</a>
+                <a href="#saved" class="menu-item"><i class="fas fa-bookmark"></i> Saved</a>
+                <a href="#monetization" class="menu-item"><i class="fas fa-dollar-sign"></i> Monetization</a>
+                <a href="#settings" class="menu-item"><i class="fas fa-cog"></i> Settings</a>
+            </div>
+            
+            <div class="monetization-card">
+                <h4><i class="fas fa-coins"></i> Earnings</h4>
+                <p class="earnings" id="userEarnings">$0.00</p>
+                <button class="btn-withdraw" id="withdrawBtn">Withdraw Earnings</button>
+            </div>
+        </div>
+
+        <!-- Main Feed -->
+        <div class="main-content">
+            <!-- Create Post -->
+            <div class="create-post" id="createPostSection" style="display: none;">
+                <div class="post-header">
+                    <img src="https://ui-avatars.com/api/?name=Guest&background=007bff" alt="User" class="profile-pic-sm" id="postAvatar">
+                    <input type="text" id="postContent" placeholder="What's on your mind?">
+                </div>
+                <div class="post-options">
+                    <button class="post-option"><i class="fas fa-video"></i> Live Video</button>
+                    <button class="post-option"><i class="fas fa-image"></i> Photo/Video</button>
+                    <button class="post-option"><i class="fas fa-smile"></i> Feeling/Activity</button>
+                    <button class="btn-post" id="postBtn">Post</button>
+                </div>
+            </div>
+
+            <!-- Stories -->
+            <div class="stories">
+                <h3>Stories</h3>
+                <div class="stories-container" id="storiesContainer">
+                    <div class="story story-add">
+                        <div class="story-content">
+                            <i class="fas fa-plus"></i>
+                            <p>Add Story</p>
+                        </div>
+                    </div>
+                    <!-- Stories will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Feed -->
+            <div class="feed" id="feedContainer">
+                <!-- Posts will be loaded here -->
+                <div class="welcome-post">
+                    <h2>Welcome to SocialSphere!</h2>
+                    <p>Connect with friends, share moments, and explore content.</p>
+                    <button class="btn-find-friends" id="findFriendsBtn">Find Friends</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <!-- Friend Requests -->
+            <div class="widget">
+                <h3>Friend Requests <span class="badge" id="requestCount">0</span></h3>
+                <div class="requests-list" id="requestsList">
+                    <p class="empty-state">No friend requests</p>
+                </div>
+            </div>
+
+            <!-- Online Friends -->
+            <div class="widget">
+                <h3>Online Friends</h3>
+                <div class="online-list" id="onlineList">
+                    <p class="empty-state">No friends online</p>
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            <div class="widget">
+                <h3>Notifications <span class="badge" id="notificationCount">0</span></h3>
+                <div class="notifications-list" id="notificationsList">
+                    <p class="empty-state">No notifications</p>
+                </div>
+            </div>
+
+            <!-- Sponsored -->
+            <div class="widget">
+                <h3>Sponsored</h3>
+                <div class="ad-card">
+                    <p>Monetize your content with SocialSphere Ads</p>
+                    <button class="btn-ad" id="adBtn">Learn More</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-globe-americas"></i> SocialSphere</h2>
+            <div class="login-form">
+                <input type="text" id="username" placeholder="Username" value="user123">
+                <input type="password" id="password" placeholder="Password" value="password123">
+                <button class="btn-login" id="loginBtn">Login</button>
+                <button class="btn-register" id="registerBtn">Create New Account</button>
+                <p class="admin-note"><i class="fas fa-shield-alt"></i> Admin: Use "admin" / "admin123" for admin panel</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messaging Panel -->
+    <div class="messaging-panel" id="messagingPanel">
+        <div class="messages-header">
+            <h3>Messages</h3>
+            <button class="btn-close-msg" id="closeMessages">×</button>
+        </div>
+        <div class="messages-list" id="messagesList">
+            <p class="empty-state">Start a conversation</p>
+        </div>
+        <div class="message-input">
+            <input type="text" id="messageInput" placeholder="Type a message...">
+            <button id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
